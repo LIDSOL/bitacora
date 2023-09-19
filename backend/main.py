@@ -1,4 +1,4 @@
-# Python implementation to create a Database in MySQL
+import flask
 import dbconfig
 
 def userExists(db, userID):
