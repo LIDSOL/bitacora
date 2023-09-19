@@ -4,7 +4,7 @@ podman run --detach \
     --replace \
     --name dbTest \
     -p 3306:3306 \
-    -v `PWD`/datadb:/var/lib/mysql:Z \
+    -v `pwd`/datadb:/var/lib/mysql:Z \
     --env MYSQL_DATABASE=bitacoraDB \
     --env MARIADB_USER=bitacoraU \
     --env MARIADB_PASSWORD=test-passwd \
