@@ -1,5 +1,14 @@
-import flask
-import dbconfig
+from flask import Flask, render_template
+import mysql.connector
+
+def databaseConnect():
+    db = mysql.connector.connect(
+        host = "127.0.0.1",
+        user = "bitacoraU",
+        passwd = "test-passwd",
+        database= "bitacoraDB"
+    )
+    return db
 
 def userExists(db, userID):
     cursor = db.cursor()
@@ -73,10 +82,13 @@ def listProjects(db):
     return cursor.fetchall()
 
 if __name__=="__main__":
-    db = dbconfig.databaseConnect()
+    db = databaseConnect()
     #print(addUser(db, "123456", "John", "Doe", "S", "example@email.net"))
     #addProject(db, "Bitacora", "123456", "Creacion de bitacora para administracion de entradas al laboratorio")
     #addLog(db, "123456","1")
     #print(userExists(db, "123456"))
     #print(listProjects(db))
     #print(projectExists(db, 1))
+
+
+app = Flask(__name__)
