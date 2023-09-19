@@ -14,8 +14,8 @@ cursor = db.cursor()
 
 # Delete old tables
 cursor.execute("DROP TABLE IF EXISTS `bitacoraDB`.`logs`;")
-cursor.execute("DROP TABLE IF EXISTS `bitacoraDB`.`users`;")
 cursor.execute("DROP TABLE IF EXISTS `bitacoraDB`.`projects`;")
+cursor.execute("DROP TABLE IF EXISTS `bitacoraDB`.`users`;")
                
 
 # Create users table
