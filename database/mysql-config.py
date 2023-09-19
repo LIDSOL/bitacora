@@ -30,3 +30,4 @@ cursor.execute("CREATE TABLE `bitacoraDB`.`projects` ( `id` INT NOT NULL AUTO_IN
 # Create foreign keys
 cursor.execute("ALTER TABLE `bitacoraDB`.`logs` ADD CONSTRAINT `fk_log_users` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`);")
 cursor.execute("ALTER TABLE `bitacoraDB`.`logs` ADD CONSTRAINT `fk_log_project` FOREIGN KEY (`projectid`) REFERENCES `bitacoraDB`.`projects` (`id`);")
+cursor.execute("ALTER TABLE `bitacoraDB`.`projects` ADD CONSTRAINT `fk_project_manager` FOREIGN KEY (`manager`) REFERENCES `bitacoraDB`.`users` (`userid`);")
