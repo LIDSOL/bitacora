@@ -1,16 +1,15 @@
-from flask import Flask, render_template
+from flask import Flask, jsonify, request
 import mysql.connector
 
-def databaseConnect():
-    db = mysql.connector.connect(
-        host = "127.0.0.1",
-        user = "bitacoraU",
-        passwd = "test-passwd",
-        database= "bitacoraDB"
-    )
-    return db
+# Database connection 
+db = mysql.connector.connect(
+    host = "127.0.0.1",
+    user = "bitacoraU",
+    passwd = "test-passwd",
+    database= "bitacoraDB"
+)
 
-def userExists(db, userID):
+def userExists(userID):
     cursor = db.cursor()
 
     sql = "SELECT * FROM users WHERE userid = %s;"
@@ -24,7 +23,7 @@ def userExists(db, userID):
     else:
         return False
  
-def projectExists(db, projectID):
+def projectExists(projectID):
     cursor = db.cursor()
 
     sql = "SELECT * FROM projects WHERE id = %s;"
@@ -38,9 +37,65 @@ def projectExists(db, projectID):
     else:
         return False
 
-def addUser(db, userID, name, surname, userType, email):
-    if userExists(db, userID):
-        return False
+app = Flask(__name__)
+
+# Testing Route
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({'response': 'pong!'})
+
+@app.route('/listProjects', methods=['GET'])
+def listProjects():
+    cursor = db.cursor()
+
+    sql = "SELECT id,name FROM projects"
+    cursor.execute(sql)
+
+    projects =  cursor.fetchall()
+
+    res = dict()
+
+    for p in projects:
+        key = p[0]
+        val = p[1]
+        res[key] = val
+
+    return jsonify(res)
+
+@app.route('/userExists', methods=['POST'])
+def userExistsW():
+    cursor = db.cursor()
+
+    userID = request.json['userID']
+
+    if userExists(userID):
+        return jsonify({'response': 'true'})
+    else:
+        return jsonify({'response': 'false'})
+
+@app.route('/projectExists', methods=['POST'])
+def projectExistsW():
+    cursor = db.cursor()
+
+    projectID = request.json['projectID']
+
+    if projectExists(projectID):
+        return jsonify({'response': 'true'})
+    else:
+        return jsonify({'response': 'false'})
+
+@app.route('/addUser', methods=['POST'])
+def addUserW():
+    cursor = db.cursor()
+
+    userID = request.json['userID']
+    name = request.json['name']
+    surname = request.json['surname']
+    userType = request.json['userType']
+    email = request.json['email']
+
+    if userExists(userID):
+        return jsonify({'response': 'User already exists'})
     else:
         cursor = db.cursor()
 
@@ -49,19 +104,31 @@ def addUser(db, userID, name, surname, userType, email):
 
         cursor.execute(sql, val)
         db.commit()
-        return True
+        return jsonify({'response': 'ok'})
 
-def addProject(db, name, manager, description):
+@app.route('/addProject', methods=['POST'])
+def addProjectW():
     cursor = db.cursor()
+
+    name = request.json['name']
+    manager = request.json['manager']
+    description = request.json['description']
+
 
     sql = "INSERT INTO projects (name, manager, description) VALUES (%s, %s, %s)"
     val = (name, manager, description)
 
     cursor.execute(sql, val)
     db.commit()
+    return jsonify({'response': 'ok'})
 
-def addLog(db, userID, projectID):
-    if userExists(db, userID) and projectExists(db, projectID):
+
+@app.route('/addLog', methods=['POST'])
+def addLogW():
+    userID = request.json['userID']
+    projectID = request.json['projectID']
+
+    if userExists(userID) and projectExists(projectID):
         cursor = db.cursor()
 
         sql = "INSERT INTO logs (userID, projectID) VALUES (%s, %s)"
@@ -69,26 +136,8 @@ def addLog(db, userID, projectID):
 
         cursor.execute(sql, val)
         db.commit()
-        return True
-    else:
-        return False
-
-def listProjects(db):
-    cursor = db.cursor()
-
-    sql = "SELECT id,name FROM projects"
-    cursor.execute(sql)
-
-    return cursor.fetchall()
-
-if __name__=="__main__":
-    db = databaseConnect()
-    #print(addUser(db, "123456", "John", "Doe", "S", "example@email.net"))
-    #addProject(db, "Bitacora", "123456", "Creacion de bitacora para administracion de entradas al laboratorio")
-    #addLog(db, "123456","1")
-    #print(userExists(db, "123456"))
-    #print(listProjects(db))
-    #print(projectExists(db, 1))
-
-
-app = Flask(__name__)
+        return jsonify({'response': 'ok'})
+    elif not userExists(userID):
+        return jsonify({'response': 'User is missing'})
+    elif not projectExists(projectID):
+        return jsonify({'response': 'Project is missing'})
