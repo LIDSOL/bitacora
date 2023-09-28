@@ -1,2 +1,4 @@
 flask == 2.3.3
 mysql-connector-python == 8.1.0
+faker == 19.6.2
+requests == 2.31.0
