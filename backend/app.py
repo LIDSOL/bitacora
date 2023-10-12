@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import mysql.connector
 
 # Database connection 
@@ -38,6 +39,7 @@ def projectExists(projectID):
         return False
 
 app = Flask(__name__)
+CORS(app)
 
 # Testing Route
 @app.route('/ping', methods=['GET'])
