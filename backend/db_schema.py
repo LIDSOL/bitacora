@@ -1,16 +1,7 @@
-# Python implementation to create a Database in MySQL
-import mysql.connector
+from connectionConfig import getMysqlConnection
 
 # connecting to the mysql server
-
-db = mysql.connector.connect(
-    host = "127.0.0.1",
-    user = "bitacoraU",
-    passwd = "test-passwd",
-    database= "bitacoraDB"
-)
-
-cursor = db.cursor()
+cursor, db = getMysqlConnection()
 
 # Delete old tables
 cursor.execute("DROP TABLE IF EXISTS `logs`;")

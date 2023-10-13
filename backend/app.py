@@ -1,18 +1,10 @@
+from connectionConfig import getMysqlConnection
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import mysql.connector
 
-# Database connection 
-db = mysql.connector.connect(
-    host = "127.0.0.1",
-    user = "bitacoraU",
-    passwd = "test-passwd",
-    database= "bitacoraDB"
-)
+cursor, db = getMysqlConnection()
 
 def userExists(userID):
-    cursor = db.cursor()
-
     sql = "SELECT * FROM users WHERE userid = %s;"
     val = (userID, )
 
@@ -25,8 +17,6 @@ def userExists(userID):
         return False
  
 def projectExists(projectID):
-    cursor = db.cursor()
-
     sql = "SELECT * FROM projects WHERE id = %s;"
     val = (projectID, )
 
@@ -48,8 +38,6 @@ def ping():
 
 @app.route('/listProjects', methods=['GET'])
 def listProjects():
-    cursor = db.cursor()
-
     sql = "SELECT id,name FROM projects"
     cursor.execute(sql)
 
@@ -66,8 +54,6 @@ def listProjects():
 
 @app.route('/userExists', methods=['POST'])
 def userExistsW():
-    cursor = db.cursor()
-
     userID = request.json['userID']
 
     if userExists(userID):
@@ -77,8 +63,6 @@ def userExistsW():
 
 @app.route('/projectExists', methods=['POST'])
 def projectExistsW():
-    cursor = db.cursor()
-
     projectID = request.json['projectID']
 
     if projectExists(projectID):
@@ -88,8 +72,6 @@ def projectExistsW():
 
 @app.route('/addUser', methods=['POST'])
 def addUserW():
-    cursor = db.cursor()
-
     userID = request.json['userID']
     name = request.json['name']
     surname = request.json['surname']
@@ -99,8 +81,6 @@ def addUserW():
     if userExists(userID):
         return jsonify({'response': 'User already exists'})
     else:
-        cursor = db.cursor()
-
         sql = "INSERT INTO users (userid, name, surname, userType, email) VALUES (%s, %s, %s, %s, %s)"
         val = (userID, name, surname, userType, email)
 
@@ -110,8 +90,6 @@ def addUserW():
 
 @app.route('/addProject', methods=['POST'])
 def addProjectW():
-    cursor = db.cursor()
-
     name = request.json['name']
     manager = request.json['manager']
     description = request.json['description']
@@ -131,8 +109,6 @@ def addLogW():
     projectID = request.json['projectID']
 
     if userExists(userID) and projectExists(projectID):
-        cursor = db.cursor()
-
         sql = "INSERT INTO logs (userID, projectID) VALUES (%s, %s)"
         val = (userID, projectID)
 
