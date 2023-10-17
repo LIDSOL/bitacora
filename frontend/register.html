@@ -17,17 +17,46 @@
         <input type="text" id="name" name="name"><br><br>
         <label for="mail"> Correo electronico: </label><br>
         <input type="text" id="mail" name="mail"><br><br>
-
         <p>La persona que ingresa al club es: </p>
-        <input type="radio" id="estudiante" name="personaIngresada" value="Estudiante">
-        <label for="estudiante">Estudiante</label><br><br>
-        <input type="radio" id="profesor" name="personaIngresada" value="Profesor">
-        <label for="profesor">Profesor</label><br><br>
 
-        <label for = "No.Cuenta"> Número de Cuenta</label><br>
-        <input type = "text" id = "numCuenta" name = "numCuenta"><br><br>
-        <label for = "RFC">RFC</label><br>
-        <input type="text" id = "Rfc" name = "Rfc"><br><br>
+        <input type="radio" id="estudiante" name="personaIngresada" value="Estudiante" onclick="showEstudiante()">
+        <label for="estudiante">Estudiante</label><br><br>
+        <input type="radio" id="profesor" name="personaIngresada" value="Profesor" onclick="showProfesor()">
+        <label for="profesor">Profesor</label><br><br>
+        
+        <script>
+            function showEstudiante() {
+                var numCuentaField = document.getElementById("numCuenta");
+                var rfcField = document.getElementById("RFC");
+                var numCuentalabel = document.querySelector("label[for='numCuenta']");
+                var rfclabel = document.querySelector("label[for ='RFC']");
+                numCuentaField.style.display = "block";
+                rfcField.style.display = "none";
+                numCuentalabel = "block";
+                rfclabel = "none";
+                numCuentaField.style.marginLeft = "auto";
+                numCuentaField.style.marginRight = "auto";
+            }
+        
+            function showProfesor() {
+                var numCuentaField = document.getElementById("numCuenta");
+                var rfcField = document.getElementById("RFC");
+                var numCuentalabel = document.querySelector("label[for='numCuenta']");
+                var rfclabel = document.querySelector("label[for ='RFC']");
+                numCuentaField.style.display = "none";
+                rfcField.style.display = "block";
+                numCuentalabel = "none";
+                rfclabel = "block";
+                rfcField.style.marginLeft = "auto";
+                inputField.style.marginRight = "auto";
+            }
+        </script>
+        
+        <label for="numCuenta">Número de Cuenta</label><br>
+        <input type="text" id="numCuenta" name="numCuenta"><br><br>
+        <label for="RFC">RFC</label><br>
+        <input type="text" id="RFC" name="RFC"><br><br>
+        
 
         <input type = "submit" value = "Registro">
       </form> 
