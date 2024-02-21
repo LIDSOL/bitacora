@@ -12,12 +12,15 @@ import (
 )
 
 var (
-	ErrInvalidUserType   = errors.New("invalid user type")
-	ErrUserExists        = errors.New("user already exists")
-	ErrUserNotExists     = errors.New("user does not exist")
-	ErrInvalidEmail      = errors.New("invalid email")
-	ErrProjectNotExists  = errors.New("project does not exist")
-	ErrInvalidMenuOption = errors.New("invalid menu option")
+	ErrInvalidUserType      = errors.New("invalid user type")
+	ErrInvalidAccountNumber = errors.New("invalid account number")
+	ErrInvalidRFC           = errors.New("invalid RFC")
+	ErrInvalidName          = errors.New("invalid name")
+	ErrUserExists           = errors.New("user already exists")
+	ErrUserNotExists        = errors.New("user does not exist")
+	ErrInvalidEmail         = errors.New("invalid email")
+	ErrProjectNotExists     = errors.New("project does not exist")
+	ErrInvalidMenuOption    = errors.New("invalid menu option")
 )
 
 func MainMenu(db *sql.DB) (bool, error) {
@@ -106,11 +109,23 @@ func MainMenu(db *sql.DB) (bool, error) {
 			huh.NewInput().
 				Title("Ingrese su número de cuenta:").
 				Value(&userID).
+				Validate(func(str string) error {
+					if ! IsValidAccountNumber(str) {
+						return ErrInvalidAccountNumber
+					}
+					return nil
+				}).
 				Run()
 		} else if uType == "WORKER" {
 			huh.NewInput().
 				Title("Ingrese su RFC:").
 				Value(&userID).
+				Validate(func(str string) error {
+					if ! IsValidRFC(str) {
+						return ErrInvalidRFC
+					}
+					return nil
+				}).
 				Run()
 		}
 		userID = CleanString(userID)
@@ -125,6 +140,12 @@ func MainMenu(db *sql.DB) (bool, error) {
 		huh.NewInput().
 			Title("Ingrese su nombre(s):").
 			Value(&name).
+			Validate(func(str string) error {
+				if ! IsValidName(str) {
+					return ErrInvalidName
+				}
+				return nil
+			}).
 			Run()
 		name = CleanString(name)
 
@@ -132,6 +153,12 @@ func MainMenu(db *sql.DB) (bool, error) {
 		huh.NewInput().
 			Title("Ingrese su(s) apellido(s):").
 			Value(&surname).
+			Validate(func(str string) error {
+				if ! IsValidName(str) {
+					return ErrInvalidName
+				}
+				return nil
+			}).
 			Run()
 		surname = CleanString(surname)
 
