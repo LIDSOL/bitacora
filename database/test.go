@@ -11,11 +11,11 @@ import (
 func GenerateFakeData(db *sql.DB, num int) error {
 	fake := faker.New()
 	var (
-		u     user
+		u     User
 		us    string
-		p     project
+		p     Project
 		ps    string
-		l     log
+		l     Log
 		ulist []string
 		plist []string
 	)
@@ -23,7 +23,7 @@ func GenerateFakeData(db *sql.DB, num int) error {
 	// Users
 	for i := 0; i < num; i++ {
 		us = fake.RandomStringWithLength(13)
-		u = user{
+		u = User{
 			userID:  us,
 			name:    fake.Person().FirstName(),
 			surname: fake.Person().LastName(),
@@ -39,7 +39,7 @@ func GenerateFakeData(db *sql.DB, num int) error {
 	// Projects
 	for i := 0; i < num; i++ {
 		ps = fake.App().Name()
-		p = project{
+		p = Project{
 			name:        ps,
 			manager:     ulist[rand.Intn(len(ulist))],
 			description: fake.Lorem().Paragraph(rand.Intn(15)),
@@ -54,7 +54,7 @@ func GenerateFakeData(db *sql.DB, num int) error {
 	for i := 0; i < num*10; i++ {
 		pID, _ := GetProjectID(db, plist[rand.Intn(len(plist))])
 
-		l = log{
+		l = Log{
 			userID:    ulist[rand.Intn(len(ulist))],
 			projectID: pID,
 		}

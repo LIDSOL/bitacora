@@ -10,7 +10,7 @@ import (
 
 // --- Structures for the database
 
-type user struct {
+type User struct {
 	// userID: Account number, RFC
 	userID  string
 	name    string
@@ -20,13 +20,13 @@ type user struct {
 	email string
 }
 
-type project struct {
+type Project struct {
 	name        string
 	manager     string
 	description string
 }
 
-type log struct {
+type Log struct {
 	userID    string
 	projectID int
 }
@@ -45,9 +45,16 @@ func GetDatabasePointer(filepath string) (*sql.DB, error) {
 	return db, nil
 }
 
-func CreateDatabaseFile(databaseFile string) error {
+func ExistsDatabase(filePath string) bool {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func CreateDatabaseFile(filePath string) error {
 	var err error
-	db, err := sql.Open("sqlite3", databaseFile)
+	db, err := sql.Open("sqlite3", filePath)
 
 	if err != nil {
 		return err
@@ -55,7 +62,7 @@ func CreateDatabaseFile(databaseFile string) error {
 
 	query := `
 		CREATE TABLE IF NOT EXISTS 'users' (
-			'id' INT PRIMARY KEY,
+			'id' INTEGER PRIMARY KEY,
 			'userid' VARCHAR(13) NOT NULL,
 			'name' VARCHAR(128) NOT NULL,
 			'surname' VARCHAR(128) NOT NULL,
@@ -69,7 +76,7 @@ func CreateDatabaseFile(databaseFile string) error {
 
 	query = `
 		CREATE TABLE IF NOT EXISTS 'projects' (
-			'id' INT PRIMARY KEY,
+			'id' INTEGER PRIMARY KEY,
 			'name' VARCHAR(128) NOT NULL,
 			'manager' VARCHAR(13) NOT NULL,
 			'description' VARCHAR(1024) NOT NULL,
@@ -82,7 +89,7 @@ func CreateDatabaseFile(databaseFile string) error {
 
 	query = `
 		CREATE TABLE IF NOT EXISTS 'logs' (
-			'num' INT PRIMARY KEY,
+			'num' INTEGER PRIMARY KEY,
 			'userid' VARCHAR(13) NOT NULL,
 			'projectid' INT NOT NULL,
 			'inTime' DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,7 +108,7 @@ func CreateDatabaseFile(databaseFile string) error {
 	return nil
 }
 
-func DeleteDatabaseFile(filePath string) error {
+func DeleteFile(filePath string) error {
 	if err := os.Remove(filePath); err != nil {
 		return err
 	}

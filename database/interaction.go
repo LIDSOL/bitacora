@@ -8,6 +8,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Create a user
+func CreateUser(userID, name, surname, uType, email string) User {
+	return User{
+		userID:  userID,
+		name:    name,
+		surname: surname,
+		uType:   uType,
+		email:   email,
+	}
+}
+
 // Know if a user exists
 func GetUserExistence(db *sql.DB, userID string) bool {
 	query := `
@@ -21,8 +32,10 @@ func GetUserExistence(db *sql.DB, userID string) bool {
 	return true
 }
 
+//
+
 // Add a user to the database
-func AddUser(db *sql.DB, u user) error {
+func AddUser(db *sql.DB, u User) error {
 	if b := GetUserExistence(db, u.userID); b {
 		return errors.New("user already exists")
 	}
@@ -53,8 +66,17 @@ func GetProjectID(db *sql.DB, name string) (int, error) {
 	return id, nil
 }
 
+// Create a project
+func CreateProject(name, manager, description string) Project {
+	return Project{
+		name:        name,
+		manager:     manager,
+		description: description,
+	}
+}
+
 // Add a project to the database
-func AddProject(db *sql.DB, p project) error {
+func AddProject(db *sql.DB, p Project) error {
 	if _, err := GetProjectID(db, p.name); err == nil {
 		return errors.New("user already exists")
 	}
@@ -71,8 +93,16 @@ func AddProject(db *sql.DB, p project) error {
 	return nil
 }
 
+// Create a log
+func CreateLog(userID string, projectID int) Log {
+	return Log{
+		userID:    userID,
+		projectID: projectID,
+	}
+}
+
 // Add a log to the database
-func AddLog(db *sql.DB, l log) error {
+func AddLog(db *sql.DB, l Log) error {
 	query := `
 		INSERT INTO 'logs' ('userid', 'projectid')
 		VALUES (?, ?);
