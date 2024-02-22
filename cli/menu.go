@@ -16,6 +16,7 @@ var (
 	ErrInvalidAccountNumber = errors.New("invalid account number")
 	ErrInvalidRFC           = errors.New("invalid RFC")
 	ErrInvalidName          = errors.New("invalid name")
+	ErrInvalidSurName       = errors.New("invalid surname")
 	ErrUserExists           = errors.New("user already exists")
 	ErrUserNotExists        = errors.New("user does not exist")
 	ErrInvalidEmail         = errors.New("invalid email")
@@ -56,36 +57,47 @@ func MainMenu(db *sql.DB) (bool, error) {
 		userID = ""
 		projectName = ""
 
-		// Ask for user ID
-		huh.NewInput().
-			Title("Ingrese su número de cuenta o RFC:").
-			Value(&userID).
-			Run()
-		userID = CleanString(userID)
+		form := huh.NewForm(
+			huh.NewGroup(
+				// Ask for user ID
+				huh.NewInput().
+					Title("Ingrese su número de cuenta o RFC:").
+					Value(&userID).
+					Validate(func(str string) error {
+						str = CleanString(str)
+						if !database.GetUserExistence(db, str) {
+							return ErrUserNotExists
+						}
+						return nil
+					}),
 
-		// Check if user exists
-		if !database.GetUserExistence(db, userID) {
-			fmt.Println("El usuario no existe.")
-			return false, ErrUserNotExists
-		}
+				// Ask for project name
+				huh.NewInput().
+					Title("Ingrese a que proyecto viene:").
+					Value(&projectName).
+					Validate(func(str string) error {
+						str = CleanString(str)
+						projectID, err = database.GetProjectID(db, str)
+						if err != nil {
+							return ErrProjectNotExists
+						}
+						return nil
+					}),
+			),
+		)
 
-		// Ask for project name
-		huh.NewInput().
-			Title("Ingrese a que proyecto viene:").
-			Value(&projectName).
-			Run()
-		projectName = CleanString(projectName)
-
-		// Get project ID
-		projectID, err = database.GetProjectID(db, projectName)
+		// Run form
+		err = form.Run()
 		if err != nil {
 			return false, err
 		}
 
 		// Add log
+		userID = CleanString(userID)
 		if err := database.AddLog(db, database.CreateLog(userID, projectID)); err != nil {
 			return false, err
 		}
+
 		SaveLog(fmt.Sprintf("User %s visited project %s", userID, projectName))
 	case 2:
 		uType = ""
@@ -110,8 +122,11 @@ func MainMenu(db *sql.DB) (bool, error) {
 				Title("Ingrese su número de cuenta:").
 				Value(&userID).
 				Validate(func(str string) error {
-					if ! IsValidAccountNumber(str) {
+					if !IsValidAccountNumber(str) {
 						return ErrInvalidAccountNumber
+					}
+					if database.GetUserExistence(db, str) {
+						return ErrUserExists
 					}
 					return nil
 				}).
@@ -121,55 +136,66 @@ func MainMenu(db *sql.DB) (bool, error) {
 				Title("Ingrese su RFC:").
 				Value(&userID).
 				Validate(func(str string) error {
-					if ! IsValidRFC(str) {
+					str = CleanString(str)
+					if !IsValidRFC(str) {
 						return ErrInvalidRFC
+					}
+					if database.GetUserExistence(db, str) {
+						return ErrUserExists
 					}
 					return nil
 				}).
 				Run()
 		}
-		userID = CleanString(userID)
 
-		// Check if user exists
-		if database.GetUserExistence(db, userID) {
-			fmt.Println("El usuario ya existe.")
-			return false, ErrUserExists
+		form := huh.NewForm(
+			huh.NewGroup(
+				// Ask for name
+				huh.NewInput().
+					Title("Ingrese su nombre(s):").
+					Value(&name).
+					Validate(func(str string) error {
+						if !IsValidName(str) {
+							return ErrInvalidName
+						}
+						return nil
+					}),
+
+				// Ask for surname
+				huh.NewInput().
+					Title("Ingrese su(s) apellido(s):").
+					Value(&surname).
+					Validate(func(str string) error {
+						if !IsValidName(str) {
+							return ErrInvalidSurName
+						}
+						return nil
+					}),
+
+				// Ask for email
+				huh.NewInput().
+					Title("Ingrese su correo electrónico:").
+					Value(&email).
+					Validate(func(str string) error {
+						if !IsValidEmail(str) {
+							return ErrInvalidEmail
+						}
+						return nil
+					}),
+			),
+		)
+
+		// Run form
+		err = form.Run()
+		if err != nil {
+			return false, err
 		}
 
-		// Ask for name
-		huh.NewInput().
-			Title("Ingrese su nombre(s):").
-			Value(&name).
-			Validate(func(str string) error {
-				if ! IsValidName(str) {
-					return ErrInvalidName
-				}
-				return nil
-			}).
-			Run()
-		name = CleanString(name)
-
-		// Ask for surname
-		huh.NewInput().
-			Title("Ingrese su(s) apellido(s):").
-			Value(&surname).
-			Validate(func(str string) error {
-				if ! IsValidName(str) {
-					return ErrInvalidName
-				}
-				return nil
-			}).
-			Run()
-		surname = CleanString(surname)
-
-		// Ask for email
-		huh.NewInput().
-			Title("Ingrese su correo electrónico:").
-			Value(&email).
-			Run()
-		email = CleanString(email)
-
 		// Add user
+		userID = CleanString(userID)
+		name = CleanString(name)
+		surname = CleanString(surname)
+		email = CleanString(email)
 		if err := database.AddUser(db, database.CreateUser(userID, name, surname, uType, email)); err != nil {
 			return false, err
 		}
@@ -180,33 +206,48 @@ func MainMenu(db *sql.DB) (bool, error) {
 		manager = ""
 		description = ""
 
-		// Ask for project name
-		huh.NewInput().
-			Title("Ingrese el nombre del proyecto:").
-			Value(&name).
-			Run()
-		name = CleanString(name)
+		form := huh.NewForm(
+			huh.NewGroup(
+				// Ask for project name
+				huh.NewInput().
+					Title("Ingrese el nombre del proyecto:").
+					Value(&name).
+					Validate(func(str string) error {
+						str = CleanString(str)
+						if database.GetProjectExistence(db, str) {
+							return ErrUserExists
+						}
+						return nil
+					}),
+				
+				// Ask for manager
+				huh.NewInput().
+					Title("Ingrese el identificador(no. cuenta / RFC) del responsable del proyecto:").
+					Value(&manager).
+					Validate(func(str string) error {
+						str = CleanString(str)
+						if !database.GetUserExistence(db, str) {
+							return ErrUserNotExists
+						}
+						return nil
+					}),
+				
+				// Ask for description
+				huh.NewInput().
+					Title("Ingrese la descripción del proyecto:").
+					Value(&description),
+			),
+		)
 
-		// Ask for manager
-		huh.NewInput().
-			Title("Ingrese el identificador del responsable del proyecto:").
-			Value(&manager).
-			Run()
-		manager = CleanString(manager)
-
-		// Check manager existence
-		if !database.GetUserExistence(db, manager) {
-			fmt.Println("El responsable no existe.")
-			return false, ErrUserNotExists
+		// Run form
+		err = form.Run()
+		if err != nil {
+			return false, err
 		}
 
-		// Ask for description
-		huh.NewInput().
-			Title("Ingrese la descripción del proyecto:").
-			Value(&description).
-			Run()
-
 		// Add project
+		name = CleanString(name)
+		manager = CleanString(manager)
 		if err := database.AddProject(db, database.CreateProject(name, manager, description)); err != nil {
 			return false, err
 		}

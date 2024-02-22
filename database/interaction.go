@@ -93,6 +93,20 @@ func AddProject(db *sql.DB, p Project) error {
 	return nil
 }
 
+// Know if a project exists
+func GetProjectExistence(db *sql.DB, projectName string) bool {
+	query := `
+		SELECT name FROM 'projects' WHERE name = ?;
+	`
+
+	if err := db.QueryRow(query, projectName).Scan(&projectName); err != nil {
+		return false
+	}
+
+	return true
+}
+
+
 // Create a log
 func CreateLog(userID string, projectID int) Log {
 	return Log{
