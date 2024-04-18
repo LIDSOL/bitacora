@@ -1,7 +1,7 @@
 all: clean build
 
 clean:
-	rm -rf ./bin/
+	-rm -rf ./bin/
 	rm -f bitacora.log
 	rm -f bitacora.db
 
