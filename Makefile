@@ -1,4 +1,4 @@
-all: clean build
+all: clean build install
 
 clean:
 	-rm -rf ./bin/
@@ -9,3 +9,6 @@ build:
 	mkdir ./bin/
 	go build -o ./bin/bitacora
 	chmod +x ./bin/bitacora
+
+install:
+	cp ./bin/bitacora /usr/local/bin/bitacora
